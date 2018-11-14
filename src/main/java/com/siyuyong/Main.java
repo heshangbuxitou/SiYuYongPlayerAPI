@@ -1,37 +1,24 @@
 package com.siyuyong;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.siyuyong.util.MapGenerateUtil;
 import com.siyuyong.util.MyUtils;
 import sun.misc.BASE64Encoder;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
     public String mm = "ss";
 
     public static void main(String[] args) {
+        String string = Stream.of("1", "2").collect(Collectors.joining(","));
+        Stream.of(string).forEach(System.out::println);
     }
 
     private static final String modulus = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7",
@@ -94,13 +81,13 @@ public class Main {
         }
     }
 
-        public String rsaEncrypt(String text, String pubKey, String modulus){
+    public String rsaEncrypt(String text, String pubKey, String modulus) {
         text = new StringBuilder(text).reverse().toString();
         BigInteger integer = new BigInteger(text.getBytes());
         BigInteger pubkeyInt = new BigInteger(pubKey, 16);
         BigInteger modulusInt = new BigInteger(modulus, 16);
         String result = integer.pow(pubkeyInt.intValue()).mod(modulusInt).toString(16);
-        while(result.length() < 256)
+        while (result.length() < 256)
             result = "0" + result;
         return result;
     }
