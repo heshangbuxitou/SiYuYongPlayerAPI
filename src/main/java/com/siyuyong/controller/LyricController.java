@@ -21,7 +21,7 @@ public class LyricController {
     public String lyric(@RequestParam(value = "track_id", required = false) String trackId,
                              @RequestParam(value = "lyric_url", required = false) String lyricUrl) {
         String[] trackArray = trackId.split("_");
-        ReplayService service = serviceConfig.getReplayServiceByIndex(Integer.valueOf(trackArray[0]));
+        ReplayService service = serviceConfig.getReplayServiceByPrefix(trackArray[0]);
 
         // 兼容虾米
         if (lyricUrl != null && !lyricUrl.equals("")){
