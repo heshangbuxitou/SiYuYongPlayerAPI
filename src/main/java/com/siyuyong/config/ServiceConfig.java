@@ -49,7 +49,11 @@ public class ServiceConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**");
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowCredentials(true).allowedHeaders("Origin, X-Requested-With, Content-Type, Accept")
+                        .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
+                        .maxAge(3600);
             }
         };
     }
