@@ -17,7 +17,7 @@ public class SearchController {
     @Autowired
     ServiceConfig serviceConfig;
 
-    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
     public String search(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
                              @RequestParam(value = "keywords") String searchKey) {
         ReplayService service = serviceConfig.getReplayServiceByIndex(index);

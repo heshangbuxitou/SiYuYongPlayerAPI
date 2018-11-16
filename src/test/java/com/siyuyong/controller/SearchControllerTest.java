@@ -48,8 +48,8 @@ public class SearchControllerTest {
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaType.APPLICATION_JSON_UTF8)
             )
-                    .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andDo(MockMvcResultHandlers.print());
+                    .andExpect(MockMvcResultMatchers.status().isOk());
+//                    .andDo(MockMvcResultHandlers.print());
         }
     }
 }
