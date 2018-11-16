@@ -19,7 +19,7 @@ public class BootstrapTrack {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/bootstrap_track", method = RequestMethod.GET)
-    public String springboot(@RequestParam(value = "track_id") String trackId) {
+    public String bootstrapTrack(@RequestParam(value = "track_id") String trackId) {
         ReplayService service = serviceConfig.getReplayServiceByPrefix(trackId);
         return service.getUrlById(trackId.split("_")[1]);
     }

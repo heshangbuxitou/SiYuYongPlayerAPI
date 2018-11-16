@@ -18,7 +18,7 @@ public class SearchController {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
-    public String springboot(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
+    public String search(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
                              @RequestParam(value = "keywords") String searchKey) {
         ReplayService service = serviceConfig.getReplayServiceByIndex(index);
         return service.searchTrack(searchKey);

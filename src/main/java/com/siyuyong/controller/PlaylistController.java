@@ -21,14 +21,14 @@ public class PlaylistController {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/show_playlist", method = RequestMethod.GET)
-    public String springboot(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
+    public String showPlaylist(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
                              @RequestParam(value = "offset", required = false, defaultValue = "0") String offset) {
         ReplayService service = serviceConfig.getReplayServiceByIndex(index);
         return service.listPlaylist(offset);
     }
 
     @RequestMapping(value = "/playlist", method = RequestMethod.GET)
-    public String springboot(@RequestParam(value = "list_id", required = false, defaultValue = "0") String listId) {
+    public String playlist(@RequestParam(value = "list_id", required = false, defaultValue = "0") String listId) {
         // todo 还有my_list_id 未完成
         ReplayService service = serviceConfig.getReplayServiceByPrefix(listId);
         Map<String, Object> result = service.getPlaylist(listId);

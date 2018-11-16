@@ -1,6 +1,7 @@
 package com.siyuyong.service;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.lang.Dict;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -11,11 +12,8 @@ import com.siyuyong.domain.NeteaseGetArtistResult;
 import com.siyuyong.domain.NeteaseGetPlaylistResult;
 import com.siyuyong.domain.NeteaseSearchResult;
 import com.siyuyong.util.HttpRequestUtil;
-import com.siyuyong.util.MapGenerateUtil;
 import com.siyuyong.util.MyUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -80,7 +78,7 @@ public class NeteaseReplayService implements ReplayService {
             map.put("img_url", "");
         }
         map.put("url", HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
-                MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
+                Dict.create().set("track_id", map.get("id"))
                 , Charset.forName("utf-8"), true));
         return map;
     }
@@ -103,7 +101,7 @@ public class NeteaseReplayService implements ReplayService {
         map.put("disabled", !weapiNePlayable(privilegesBean));
 
         map.put("url", HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
-                MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
+                Dict.create().set("track_id", map.get("id"))
                 , Charset.forName("utf-8"), true));
         return map;
     }
@@ -170,8 +168,7 @@ public class NeteaseReplayService implements ReplayService {
         String encText = aesEncrypt(aesEncrypt(text, nonce), secKey);
         String encSecKey = rsaEncrypt(secKey, pubKey, modulus);
 
-        return MapGenerateUtil.createMap(new String[]{"params", "encSecKey"},
-                new Object[]{encText, encSecKey}, LinkedHashMap.class);
+        return Dict.create().set("params", encText).set("encSecKey", encSecKey);
     }
 
     @Override
@@ -180,8 +177,8 @@ public class NeteaseReplayService implements ReplayService {
         String url = "http://music.163.com/api/search/get";
         int stype = 1, offset = 0;
         String total = "true";
-        Map<String, Object> paramMap = MapGenerateUtil.createMap(new String[]{"s", "type", "offset", "total", "limit"},
-                new Object[]{urlKeyWord, stype, offset, total, 60});
+        Map<String, Object> paramMap = Dict.create().set("s", urlKeyWord).set("type", stype).set("offset", offset)
+                .set("total", total).set("limit", 60);
         String response = neteaseRequest(url, paramMap);
 
         NeteaseSearchResult data = JSON.parseObject(response, NeteaseSearchResult.class);
@@ -192,19 +189,18 @@ public class NeteaseReplayService implements ReplayService {
                 result.add(convertSong(song));
             }
         }
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
+        return JSON.toJSONString(Dict.create().set("result", result));
     }
 
     @Override
     public String getLyricById(String songId) {
-        Map<String, Object> paramMap = MapGenerateUtil.createMap(new String[]{"id", "lv", "tv", "csrf_token"},
-                new Object[]{songId, -1, -1, ""}, LinkedHashMap.class);
+        Map<String, Object> paramMap = Dict.create().set("id", songId).set("lv", -1).set("tv", -1).set("csrf_token", "");
         paramMap = encryptedRequest(paramMap);
         String url = "http://music.163.com/weapi/song/lyric?csrf_token=";
         String response = neteaseRequest(url, paramMap);
         JSONObject data = JSON.parseObject(response);
         String lrc = data.containsKey("lrc") ? data.getJSONObject("lrc").getString("lyric") : "";
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"lyric"}, new Object[]{lrc}));
+        return JSON.toJSONString(Dict.create().set("lyric", lrc));
     }
 
     @Override
@@ -212,12 +208,14 @@ public class NeteaseReplayService implements ReplayService {
         List<Object> result = new ArrayList<>();
         for (Object obj : topPlaylists(Integer.parseInt(offset))) {
             JSONObject map = (JSONObject) obj;
-            String[] keyList = {"cover_img_url", "title", "play_count", "list_id", "source_url"};
-            Object[] valueList = {map.getString("coverImgUrl") + "?param=140y140", map.getString("name"),
-                    map.getString("playCount"), "http://music.163.com/#/playlist?id=" + map.get("id")};
-            result.add(MapGenerateUtil.createMap(keyList, valueList));
+            Map<String, Object> playlistMap = Dict.create().set("cover_img_url", map.getString("coverImgUrl") + "?param=140y140")
+                    .set("title", map.getString("name"))
+                    .set("play_count", map.getString("playCount"))
+                    .set("list_id", "neplaylist_" + map.get("id"))
+                    .set("source_url", "http://music.163.com/#/playlist?id=" + map.get("id"));
+            result.add(playlistMap);
         }
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
+        return JSON.toJSONString(Dict.create().set("result", result));
     }
 
     //参考 https://github.com/darknessomi/musicbox
@@ -250,10 +248,10 @@ public class NeteaseReplayService implements ReplayService {
         String resonpse = neteaseRequest(url);
         NeteaseGetArtistResult data = JSON.parseObject(resonpse, NeteaseGetArtistResult.class);
 
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {data.getArtist().getPicUrl(), data.getArtist().getName(),
-                "neartist_" + artistId, "http://music.163.com/#/artist?id=" + artistId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
+        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getArtist().getPicUrl())
+                .set("title", data.getArtist().getName())
+                .set("id", "neartist_" + artistId)
+                .set("source_url", "http://music.163.com/#/artist?id=" + artistId);
 
         List<NeteaseSearchResult.ResultBean.SongsBean> list = data.getHotSongs();
         List<Object> result = new ArrayList<>();
@@ -262,21 +260,22 @@ public class NeteaseReplayService implements ReplayService {
                 result.add(convertSong(song));
             }
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return Dict.create().set("tracks", result).set("info", infoMap);
     }
 
     private Map<String, Object> neGetPlaylist(String playlistId) {
         String url = "http://music.163.com/weapi/v3/playlist/detail";
-        Map<String, Object> paramMap = MapGenerateUtil.createMap(new String[]{"id", "offset", "total", "limit", "n", "csrf_token"},
-                new Object[]{playlistId, 0, true, 1000, 1000, ""}, LinkedHashMap.class);
+        Map<String, Object> paramMap = Dict.create().set("id", playlistId).set("offset", 0).set("total", true)
+                .set("limit", 1000).set("n", 1000).set("csrf_token", "");
         paramMap = encryptedRequest(paramMap);
         String resonpse = neteaseRequest(url, paramMap);
         NeteaseGetPlaylistResult data = JSON.parseObject(resonpse, NeteaseGetPlaylistResult.class);
 
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {data.getPlaylist().getCoverImgUrl(), data.getPlaylist().getName(),
-                "neplaylist_" + playlistId, "http://music.163.com/#/playlist?id=" + playlistId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
+        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getPlaylist().getCoverImgUrl())
+                .set("title", data.getPlaylist().getName())
+                .set("id", "neplaylist_" + playlistId)
+                .set("source_url", "http://music.163.com/#/playlist?id=" + playlistId);
+
         List<NeteaseGetPlaylistResult.PlaylistBean.TracksBean> list = data.getPlaylist().getTracks();
         List<Object> result = new ArrayList<>();
         int index = 0;
@@ -284,7 +283,7 @@ public class NeteaseReplayService implements ReplayService {
             result.add(weapiConvertSong(song, data.getPrivileges().get(index)));
             index++;
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return Dict.create().set("tracks", result).set("info", infoMap);
     }
 
     private Map<String, Object> getAlbum(String albumId) {
@@ -292,10 +291,10 @@ public class NeteaseReplayService implements ReplayService {
         String resonpse = neteaseRequest(url);
         NeteaseGetAlbumResult data = JSON.parseObject(resonpse, NeteaseGetAlbumResult.class);
 
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {data.getAlbum().getPicUrl(), data.getAlbum().getName(),
-                "nealbum_" + albumId, "http://music.163.com/#/album?id=" + albumId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
+        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getAlbum().getPicUrl())
+                .set("title", data.getAlbum().getName())
+                .set("id", "nealbum_" + albumId)
+                .set("source_url", "http://music.163.com/#/album?id=" + albumId);
 
         List<NeteaseSearchResult.ResultBean.SongsBean> list = data.getAlbum().getSongs();
         List<Object> result = new ArrayList<>();
@@ -304,19 +303,20 @@ public class NeteaseReplayService implements ReplayService {
                 result.add(convertSong(song));
             }
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return Dict.create().set("tracks", result).set("info", infoMap);
     }
 
     @Override
     public String getUrlById(String songId) {
         Logger.getAnonymousLogger().info(songId);
-        Map<String, Object> paramMap = MapGenerateUtil.createMap(new String[]{"ids", "br", "csrf_token"},
-                new Object[]{Arrays.asList(songId), 12800, ""}, LinkedHashMap.class);
+        Map<String, Object> paramMap = Dict.create().set("ids", Arrays.asList(songId))
+                .set("br", 12800).set("csrf_token", "");
         String url = "http://music.163.com/weapi/song/enhance/player/url?csrf_token=";
         paramMap = encryptedRequest(paramMap);
         String response = neteaseRequest(url, paramMap);
         JSONObject data = JSON.parseObject(response);
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"song_url"},
-                new Object[]{data.getJSONArray("data").getJSONObject(0).getString("url")}));
+
+        return JSON.toJSONString(Dict.create()
+                .set("song_url", data.getJSONArray("data").getJSONObject(0).getString("url")));
     }
 }

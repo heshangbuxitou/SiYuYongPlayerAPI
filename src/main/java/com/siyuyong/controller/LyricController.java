@@ -18,7 +18,7 @@ public class LyricController {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/lyric", method = RequestMethod.GET)
-    public String springboot(@RequestParam(value = "track_id", required = false) String trackId,
+    public String lyric(@RequestParam(value = "track_id", required = false) String trackId,
                              @RequestParam(value = "lyric_url", required = false) String lyricUrl) {
         String[] trackArray = trackId.split("_");
         ReplayService service = serviceConfig.getReplayServiceByIndex(Integer.valueOf(trackArray[0]));
