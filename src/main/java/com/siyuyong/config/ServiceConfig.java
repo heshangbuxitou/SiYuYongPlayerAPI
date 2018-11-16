@@ -7,6 +7,8 @@ import com.siyuyong.service.XiamiReplayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -28,33 +30,47 @@ public class ServiceConfig {
     @Autowired
     private List<ReplayService> replayServiceList;
 
-    public ReplayService getReplayServiceByIndex(int index){
+    public ReplayService getReplayServiceByIndex(int index) {
         return replayServiceList.get(index);
     }
 
-    public ReplayService getReplayServiceByPrefix(String prefix){
-        if(prefix.startsWith("ne")){
+    public ReplayService getReplayServiceByPrefix(String prefix) {
+        if (prefix.startsWith("ne")) {
             return neteaseReplayService;
-        }else if (prefix.startsWith("xm")){
+        } else if (prefix.startsWith("xm")) {
             return xiamiReplayService;
-        }else if(prefix.startsWith("qq")){
+        } else if (prefix.startsWith("qq")) {
             return qQReplayService;
-        }else {
+        } else {
             throw new RuntimeException("不存在的Service类型。。。");
         }
     }
 
+    //    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("*")
+//                        .allowCredentials(true)
+//                        .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
+//                        .maxAge(3600);
+//            }
+//        };
+//    }
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowCredentials(true).allowedHeaders("Origin, X-Requested-With, Content-Type, Accept")
-                        .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
-                        .maxAge(3600);
-            }
-        };
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", buildConfig());
+        return new CorsFilter(source);
+    }
+
+    private CorsConfiguration buildConfig() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+        return corsConfiguration;
     }
 }
