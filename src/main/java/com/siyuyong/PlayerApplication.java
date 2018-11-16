@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication // 等价于@Configuration，@EnableAutoConfiguration和@ComponentScan
 public class PlayerApplication {
@@ -28,4 +30,5 @@ public class PlayerApplication {
 //        HttpMessageConverter<?> converter = fastConverter;
 //        return new HttpMessageConverters(converter);
 //    }
+
 }
