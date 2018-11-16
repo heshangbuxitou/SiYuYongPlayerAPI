@@ -127,7 +127,7 @@ public class XiamiReplayService implements ReplayService {
         } else {
             map.put("img_url", "");
         }
-        map.put("url", HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
+        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
                 MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
                 , Charset.forName("utf-8"), true));
         return map;

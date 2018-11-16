@@ -95,7 +95,7 @@ public class QQReplayService implements ReplayService {
         map.put("source_url", "http://y.qq.com/#type=song&mid=" + song.getSongmid() + "&tpl=yqq_song_detail");
         map.put("disabled", !qqPlayable(song));
 
-        map.put("url", HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
+        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
                 MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
                 , Charset.forName("utf-8"), true));
         return map;
