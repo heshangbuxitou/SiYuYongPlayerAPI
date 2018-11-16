@@ -14,15 +14,9 @@ import com.siyuyong.domain.QQSearchResult;
 import com.siyuyong.util.HttpRequestUtil;
 import com.siyuyong.util.MapGenerateUtil;
 import com.siyuyong.util.MyUtils;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletContext;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.*;
 
