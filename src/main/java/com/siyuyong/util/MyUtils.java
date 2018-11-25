@@ -13,7 +13,8 @@ import java.util.Random;
 public class MyUtils {
     private MyUtils() {
     }
-    private static String hexStr = "0123456789ABCDEF"; //全局
+    //全局
+    private static String hexStr = "0123456789ABCDEF";
 
     public static String getLocalhostIp() {
         InetAddress localHost = null;

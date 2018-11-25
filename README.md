@@ -7,3 +7,16 @@
     * 例如标注字段的 name。
     * @JSONField(format="yyyy-MM-dd HH:mm") 标注输出方式
     * @JSONField(serialize=false) 是否需要序列化属性
+    
+ # 重写 Spring Cache
+Example：
+* 在配置文件中编写对应的缓存时间和自动刷新时间
+```
+select.cache.timeout=300
+select.cache.refresh=150
+``` 
+* 在@Cacheable注解中直接引入
+```$xslt
+ @Cacheable(value = "playlist#${select.cache.timeout}#${select.cache.refresh}")
+```
+

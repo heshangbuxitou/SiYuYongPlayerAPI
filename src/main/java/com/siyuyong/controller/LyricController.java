@@ -24,7 +24,7 @@ public class LyricController {
         ReplayService service = serviceConfig.getReplayServiceByPrefix(trackArray[0]);
 
         // 兼容虾米
-        if (lyricUrl != null && !lyricUrl.equals("")){
+        if (lyricUrl != null && !"".equals(lyricUrl)){
             trackArray[1] = lyricUrl;
         }
         return service.getLyricById(trackArray[1]);

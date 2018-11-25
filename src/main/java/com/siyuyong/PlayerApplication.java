@@ -2,8 +2,10 @@ package com.siyuyong;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication // 等价于@Configuration，@EnableAutoConfiguration和@ComponentScan
+@EnableCaching
 public class PlayerApplication {
     public static void main(String[] args) {
         SpringApplication.run(PlayerApplication.class, args);

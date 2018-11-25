@@ -24,6 +24,12 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * XiamiReplayService class
+ *
+ * @author zhu.yong
+ * @date 2018/11/25
+ */
 @Component
 @Order(value = 2)
 public class XiamiReplayService implements ReplayService {
@@ -33,7 +39,7 @@ public class XiamiReplayService implements ReplayService {
 
 
     public String xiaMiRequest(String url) {
-        Map<String, List<String>> extraHeaders = new HashMap<>();
+        Map<String, List<String>> extraHeaders = new HashMap<>(32);
         extraHeaders.put("Accept", Arrays.asList("application/json, text/plain, */*"));
         extraHeaders.put("Accept-Encoding", Arrays.asList("gzip,deflate,sdch"));
         extraHeaders.put("Accept-Language", Arrays.asList("zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4"));
@@ -110,7 +116,7 @@ public class XiamiReplayService implements ReplayService {
     }
 
     public Object convertSong(XiamiSearchResult.DataBean.SongsBean song) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(32);
         map.put("id", "xmtrack_" + song.getSong_id());
         map.put("title", song.getSong_name());
         map.put("artist", song.getArtist_name());
@@ -189,8 +195,9 @@ public class XiamiReplayService implements ReplayService {
                 return getAlbum(typeAndId[1]);
             case "xmartist":
                 return getArtist(typeAndId[1]);
+            default:
+                throw new IllegalArgumentException("不存在的Playlist类型" + typeAndId[0]);
         }
-        throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
     }
 
     private Map<String, Object> getArtist(String artistId) {
@@ -266,7 +273,7 @@ public class XiamiReplayService implements ReplayService {
         String url = "http://www.xiami.com/song/playlist/id/" + songId +
                 "/object_name/default/object_id/0/cat/json";
 
-        Map<String, List<String>> extraHeaders = new HashMap<>();
+        Map<String, List<String>> extraHeaders = new HashMap<>(32);
         extraHeaders.put("Referer", Arrays.asList("http://www.xiami.com/"));
         extraHeaders.put("Origin", Arrays.asList("http://www.xiami.com/"));
 

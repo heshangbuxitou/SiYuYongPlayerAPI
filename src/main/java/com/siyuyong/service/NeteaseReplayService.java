@@ -13,6 +13,7 @@ import com.siyuyong.domain.NeteaseGetPlaylistResult;
 import com.siyuyong.domain.NeteaseSearchResult;
 import com.siyuyong.util.HttpRequestUtil;
 import com.siyuyong.util.MyUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -34,12 +35,14 @@ public class NeteaseReplayService implements ReplayService {
     private static final String AES_CBC_PADDING = "AES/CBC/PKCS5Padding";
     private static final Charset charset = Charset.forName("UTF-8");
 
+    private static final int RSA_ENCRYPT_LENGTH = 256;
+
     public String getPort() {
         return Constant.DEFAULT_SERVER_PORT;
     }
 
     public String neteaseRequest(String url, Map<String, Object> data) {
-        Map<String, List<String>> extraHeaders = new HashMap<>();
+        Map<String, List<String>> extraHeaders = new HashMap<>(32);
         extraHeaders.put("Accept", Arrays.asList("*/*"));
         extraHeaders.put("Accept-Encoding", Arrays.asList("gzip,deflate,sdch"));
         extraHeaders.put("Accept-Language", Arrays.asList("zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4"));
@@ -61,7 +64,7 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     private Object convertSong(NeteaseSearchResult.ResultBean.SongsBean song) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(32);
         map.put("id", "netrack_" + song.getId());
         map.put("title", song.getName());
         map.put("artist", song.getArtists().get(0).getName());
@@ -88,7 +91,7 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     private Object weapiConvertSong(NeteaseGetPlaylistResult.PlaylistBean.TracksBean song, NeteaseGetPlaylistResult.PrivilegesBean privilegesBean) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(32);
         map.put("id", "netrack_" + song.getId());
         map.put("title", song.getName());
         map.put("artist", song.getAr().get(0).getName());
@@ -143,9 +146,7 @@ public class NeteaseReplayService implements ReplayService {
         BigInteger b3 = new BigInteger(modulus, 16);
 
         String result = fastExpMod(b1, b2, b3);
-        while (result.length() < 256)
-            result = "0" + result;
-        return result;
+        return StringUtils.leftPad(result, RSA_ENCRYPT_LENGTH, "0");
     }
 
     public String aesEncrypt(String text, String secKey) {

@@ -29,7 +29,7 @@ public class QQReplayService implements ReplayService {
     }
 
     public String qqRequest(String url) {
-        Map<String, List<String>> extraHeaders = new HashMap<>();
+        Map<String, List<String>> extraHeaders = new HashMap<>(32);
         extraHeaders.put("Accept", Arrays.asList("*/*"));
         extraHeaders.put("Accept-Encoding", Arrays.asList("gzip,deflate,sdch"));
         extraHeaders.put("Accept-Language", Arrays.asList("zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4"));
@@ -63,7 +63,7 @@ public class QQReplayService implements ReplayService {
     }
 
     public String getImageUrl(String qqImgId, String imgType) {
-        if (qqImgId.equals("")) {
+        if ("".equals(qqImgId)) {
             return "";
         }
         String category;
@@ -83,7 +83,7 @@ public class QQReplayService implements ReplayService {
     }
 
     public Object convertSong(QQSearchResult.DataBean.SongBean.ListBean song) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(32);
         map.put("id", "qqtrack_" + song.getSongmid());
         map.put("title", song.getSongname());
         map.put("artist", song.getSinger().get(0).getName());
