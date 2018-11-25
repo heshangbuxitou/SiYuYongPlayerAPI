@@ -3,12 +3,11 @@ package com.siyuyong.config;
 import com.siyuyong.cache.CustomizedConcurrentMapCacheManager;
 import com.siyuyong.interceptor.HeaderInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -24,6 +23,9 @@ import java.util.Map;
  */
 @Configuration
 public class WebConfig {
+
+    @Autowired
+    Environment environment;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -41,7 +43,9 @@ public class WebConfig {
             // 拦截器 配置
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(new HeaderInterceptor()).addPathPatterns("/**");
+                if(environment.containsProperty("player.server.header.interceptor")){
+                    registry.addInterceptor(new HeaderInterceptor()).addPathPatterns("/**");
+                }
             }
         };
     }
