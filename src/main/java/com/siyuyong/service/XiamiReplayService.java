@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.siyuyong.constant.Constant;
-import com.siyuyong.domain.XiamiGetAlbumResult;
-import com.siyuyong.domain.XiamiGetArtistResult;
-import com.siyuyong.domain.XiamiGetPlaylistResult;
-import com.siyuyong.domain.XiamiSearchResult;
+import com.siyuyong.domain.*;
 import com.siyuyong.util.HttpRequestUtil;
 import com.siyuyong.util.MapGenerateUtil;
 import com.siyuyong.util.MyUtils;
@@ -269,7 +266,7 @@ public class XiamiReplayService implements ReplayService {
 
 
     @Override
-    public String getUrlById(String songId) {
+    public BootstrapResult getUrlById(String songId) {
         String url = "http://www.xiami.com/song/playlist/id/" + songId +
                 "/object_name/default/object_id/0/cat/json";
 
@@ -280,10 +277,11 @@ public class XiamiReplayService implements ReplayService {
         String response = xiaMiRequest(url);
         JSONObject songResponse = JSON.parseObject(response).getJSONObject("data").getJSONArray("trackList").getJSONObject(0);
         String secret = songResponse.getString("location");
-        return JSON.toJSONString(MapGenerateUtil.createMap(
-                new String[]{"song_url", "lyric_url", "img_url"},
-                new String[]{MyUtils.handleRelativeUrl(caesar(secret)),
-                        MyUtils.handleRelativeUrl(songResponse.getString("lyric_url")),
-                        MyUtils.handleRelativeUrl(songResponse.getString("pic"))}));
+
+        BootstrapResult result = new BootstrapResult();
+        result.setSong_url(MyUtils.handleRelativeUrl(caesar(secret)));
+        result.setLyric_url(MyUtils.handleRelativeUrl(songResponse.getString("lyric_url")));
+        result.setImg_url(MyUtils.handleRelativeUrl(songResponse.getString("pic")));
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package com.siyuyong.controller;
 
 import com.siyuyong.config.ServiceConfig;
+import com.siyuyong.domain.BootstrapResult;
 import com.siyuyong.service.ReplayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -19,7 +20,7 @@ public class BootstrapTrack {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/bootstrap_track", method = RequestMethod.GET)
-    public String bootstrapTrack(@RequestParam(value = "track_id") String trackId) {
+    public BootstrapResult bootstrapTrack(@RequestParam(value = "track_id") String trackId) {
         ReplayService service = serviceConfig.getReplayServiceByPrefix(trackId);
         return service.getUrlById(trackId.split("_")[1]);
     }

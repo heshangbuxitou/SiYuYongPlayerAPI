@@ -20,12 +20,21 @@ import java.util.stream.Stream;
 public class Main {
     public String mm = "ss";
 
+    public Main(String ss){
+        System.out.println(mm);
+        mm = ss;
+    }
+
     public static void main(String[] args) {
         String string = Stream.of("1", "2").collect(Collectors.joining(","));
         Stream.of(string).forEach(System.out::println);
         StringBuffer sb = new StringBuffer("456");
         String s = StringUtils.leftPad("22", 5, "0");
         System.out.println(s);
+
+
+        Main main = new Main("11");
+        System.out.println(main.mm);
     }
 
     public static byte[] addBytes(byte[] data1, byte[] data2) {

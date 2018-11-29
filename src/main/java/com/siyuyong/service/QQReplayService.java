@@ -7,10 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.siyuyong.constant.Constant;
-import com.siyuyong.domain.QQGetAlbumResult;
-import com.siyuyong.domain.QQGetArtistResult;
-import com.siyuyong.domain.QQGetPlaylistResult;
-import com.siyuyong.domain.QQSearchResult;
+import com.siyuyong.domain.*;
 import com.siyuyong.util.HttpRequestUtil;
 import com.siyuyong.util.MapGenerateUtil;
 import com.siyuyong.util.MyUtils;
@@ -247,10 +244,10 @@ public class QQReplayService implements ReplayService {
     }
 
     @Override
-    public String getUrlById(String songId) {
+    public BootstrapResult getUrlById(String songId) {
         String token = getQQToken(songId);
         String url = "http://dl.stream.qqmusic.qq.com/C400" + songId +
                 ".m4a?vkey=" + token + "&uin=1297716249&fromtag=0&guid=7332953645";
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"song_url"}, new String[]{url}));
+        return new BootstrapResult(url);
     }
 }

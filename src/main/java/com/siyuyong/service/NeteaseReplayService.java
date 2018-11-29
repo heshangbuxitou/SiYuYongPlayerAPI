@@ -7,10 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.siyuyong.constant.Constant;
-import com.siyuyong.domain.NeteaseGetAlbumResult;
-import com.siyuyong.domain.NeteaseGetArtistResult;
-import com.siyuyong.domain.NeteaseGetPlaylistResult;
-import com.siyuyong.domain.NeteaseSearchResult;
+import com.siyuyong.domain.*;
 import com.siyuyong.util.HttpRequestUtil;
 import com.siyuyong.util.MyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -308,7 +305,7 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     @Override
-    public String getUrlById(String songId) {
+    public BootstrapResult getUrlById(String songId) {
         Logger.getAnonymousLogger().info(songId);
         Map<String, Object> paramMap = Dict.create().set("ids", Arrays.asList(songId))
                 .set("br", 12800).set("csrf_token", "");
@@ -317,7 +314,6 @@ public class NeteaseReplayService implements ReplayService {
         String response = neteaseRequest(url, paramMap);
         JSONObject data = JSON.parseObject(response);
 
-        return JSON.toJSONString(Dict.create()
-                .set("song_url", data.getJSONArray("data").getJSONObject(0).getString("url")));
+        return new BootstrapResult(data.getJSONArray("data").getJSONObject(0).getString("url"));
     }
 }

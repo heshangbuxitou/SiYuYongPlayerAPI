@@ -11,7 +11,7 @@ public class BootstrapTrackTest extends BaseControllerTest {
     public void bootstrapTrack() throws Exception {
         for (String songId: Stream.of("netrack_27646597", "xmtrack_1805931174", "qqtrack_002HybvF4WaCcj").toArray(String[]::new)){
             baseTest("/bootstrap_track", Dict.create()
-                    .set("track_id", songId));
+                    .set("track_id", songId),true);
         }
     }
 }

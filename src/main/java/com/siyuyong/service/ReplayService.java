@@ -1,5 +1,7 @@
 package com.siyuyong.service;
 
+import com.siyuyong.domain.BootstrapResult;
+
 import java.util.Map;
 
 public interface ReplayService {
@@ -31,5 +33,5 @@ public interface ReplayService {
      * @param songId 歌曲id
      * @return 歌曲url
      */
-    String getUrlById(String songId);
+    BootstrapResult getUrlById(String songId);
 }
