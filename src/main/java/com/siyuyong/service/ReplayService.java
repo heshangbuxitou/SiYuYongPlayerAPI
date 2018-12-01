@@ -1,6 +1,7 @@
 package com.siyuyong.service;
 
 import com.siyuyong.domain.BootstrapResult;
+import com.siyuyong.domain.ListPlayListResult;
 import com.siyuyong.domain.LyricResult;
 import com.siyuyong.domain.SearchResult;
 
@@ -23,7 +24,7 @@ public interface ReplayService {
      * @param offset 偏移量
      * @return 首页歌单列表
      */
-    String listPlaylist(String offset);
+    ListPlayListResult listPlaylist(String offset);
 
     /**
      * @param listId 歌曲的listid

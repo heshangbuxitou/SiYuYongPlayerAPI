@@ -176,7 +176,6 @@ public class NeteaseReplayService implements ReplayService {
 
         NeteaseSearchResult data = JSON.parseObject(response, NeteaseSearchResult.class);
         List<NeteaseSearchResult.ResultBean.SongsBean> songs = data.getResult().getSongs();
-//        List<Object> result = new ArrayList<>();
         SearchResult result = new SearchResult();
         for (NeteaseSearchResult.ResultBean.SongsBean song : songs) {
             if (song.getStatus() != -1) {
@@ -198,18 +197,21 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     @Override
-    public String listPlaylist(String offset) {
-        List<Object> result = new ArrayList<>();
+    public ListPlayListResult listPlaylist(String offset) {
+//        List<Object> result = new ArrayList<>();
+        ListPlayListResult result = new ListPlayListResult();
+
         for (Object obj : topPlaylists(Integer.parseInt(offset))) {
             JSONObject map = (JSONObject) obj;
-            Map<String, Object> playlistMap = Dict.create().set("cover_img_url", map.getString("coverImgUrl") + "?param=140y140")
-                    .set("title", map.getString("name"))
-                    .set("play_count", map.getString("playCount"))
-                    .set("list_id", "neplaylist_" + map.get("id"))
-                    .set("source_url", "http://music.163.com/#/playlist?id=" + map.get("id"));
-            result.add(playlistMap);
+            ListPlayListResult.ResultBean resultBean = new ListPlayListResult.ResultBean();
+            resultBean.setCover_img_url(map.getString("coverImgUrl") + "?param=140y140");
+            resultBean.setTitle(map.getString("name"));
+            resultBean.setPlay_count(map.getInteger("playCount"));
+            resultBean.setList_id("neplaylist_" + map.get("id"));
+            resultBean.setSource_url("http://music.163.com/#/playlist?id=" + map.get("id"));
+            result.getResult().add(resultBean);
         }
-        return JSON.toJSONString(Dict.create().set("result", result));
+        return result;
     }
 
     //参考 https://github.com/darknessomi/musicbox

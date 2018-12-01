@@ -137,7 +137,7 @@ public class QQReplayService implements ReplayService {
     }
 
     @Override
-    public String listPlaylist(String offset) {
+    public ListPlayListResult listPlaylist(String offset) {
         Integer sortId = Integer.parseInt(offset) / 30 + 1;
         String url = "http://i.y.qq.com/s.plcloud/fcgi-bin/fcg_get_diss_by_tag" +
                 ".fcg?categoryId=10000000&sortId=" + sortId + "&sin=0&ein=29&" +
@@ -149,17 +149,18 @@ public class QQReplayService implements ReplayService {
         response = response.substring("MusicJsonCallback(".length(), response.length() - 1);
         JSONObject jsonObject = JSON.parseObject(response);
 
-        List<Object> result = new ArrayList<>();
+        ListPlayListResult result = new ListPlayListResult();
         JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("list");
         for (Object obj : jsonArray) {
-            Map<String, Object> map = (Map<String, Object>) obj;
-            String[] keyList = {"cover_img_url", "title", "play_count", "list_id"};
-            Object[] valueList = {map.get("imgurl"), HtmlUtil.unescape((String) map.get("dissname")),
-                    map.get("listennum"), "qqplaylist_" + map.get("dissid")};
-            result.add(MapGenerateUtil.createMap(keyList, valueList));
+            JSONObject data = (JSONObject) obj;
+            ListPlayListResult.ResultBean resultBean = new ListPlayListResult.ResultBean();
+            resultBean.setCover_img_url(data.getString("imgurl"));
+            resultBean.setTitle(HtmlUtil.unescape((String) data.get("dissname")));
+            resultBean.setPlay_count(data.getInteger("listennum"));
+            resultBean.setList_id("qqplaylist_" + data.get("dissid"));
+            result.getResult().add(resultBean);
         }
-
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
+        return result;
     }
 
 

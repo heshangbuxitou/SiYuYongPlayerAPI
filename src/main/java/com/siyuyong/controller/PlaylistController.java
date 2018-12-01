@@ -2,6 +2,7 @@ package com.siyuyong.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.siyuyong.config.ServiceConfig;
+import com.siyuyong.domain.ListPlayListResult;
 import com.siyuyong.service.ReplayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,8 +20,8 @@ public class PlaylistController {
 
     @RequestMapping(value = "/show_playlist", method = RequestMethod.GET)
     @Cacheable(value = "listplaylist#${select.cache.timeout}#${select.cache.refresh}", key = "#index + '' + #offset") // SpEL表达式 组合Key 也可以这样 T(String).valueOf(#index).concat(#offset)
-    public String showPlaylist(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
-                             @RequestParam(value = "offset", required = false, defaultValue = "0") String offset) {
+    public ListPlayListResult showPlaylist(@RequestParam(value = "source", required = false, defaultValue = "0") int index,
+                                           @RequestParam(value = "offset", required = false, defaultValue = "0") String offset) {
         ReplayService service = serviceConfig.getReplayServiceByIndex(index);
         return service.listPlaylist(offset);
     }

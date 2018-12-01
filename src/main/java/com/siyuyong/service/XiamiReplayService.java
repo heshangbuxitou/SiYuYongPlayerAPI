@@ -114,28 +114,6 @@ public class XiamiReplayService implements ReplayService {
     }
 
     public ConvertSongBean convertSong(XiamiSearchResult.DataBean.SongsBean song) {
-//        Map<String, Object> map = new HashMap<>(32);
-//        map.put("id", "xmtrack_" + song.getSong_id());
-//        map.put("title", song.getSong_name());
-//        map.put("artist", song.getArtist_name());
-//        map.put("artist_id", "xmartist_" + song.getArtist_id());
-//        map.put("album", song.getAlbum_name());
-//        map.put("album_id", "xmalbum_" + song.getAlbum_id());
-//        map.put("source", "xiami");
-//        map.put("source_url", "http://www.xiami.com/song/" + song.getSong_id());
-//
-//        if (song.getLogo() != null) {
-//            map.put("img_url", song.getLogo());
-//        } else if (song.getAlbum_logo() != null) {
-//            map.put("img_url", song.getAlbum_logo());
-//        } else {
-//            map.put("img_url", "");
-//        }
-//        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
-//                MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
-//                , Charset.forName("utf-8"), true));
-//        return map;
-
         ConvertSongBean songBean = new ConvertSongBean();
         songBean.setId("xmtrack_" + song.getSong_id());
         songBean.setTitle(song.getSong_name());
@@ -179,7 +157,7 @@ public class XiamiReplayService implements ReplayService {
     }
 
     @Override
-    public String listPlaylist(String offset) {
+    public ListPlayListResult listPlaylist(String offset) {
         Integer sortId = Integer.parseInt(offset) / 60 + 1;
         String url = "http://api.xiami.com/web?v=2.0&app_key=1&_ksTS=1459927525542_91" +
                 "&page=" + sortId + "&limit=60&callback=jsonp92&r=collect/recommend";
@@ -187,18 +165,21 @@ public class XiamiReplayService implements ReplayService {
         resonpse = resonpse.substring("jsonp92(".length(), resonpse.length() - 1);
         JSONObject jsonObject = JSON.parseObject(resonpse);
 
-        List<Object> result = new ArrayList<>();
+        ListPlayListResult result = new ListPlayListResult();
+
         JSONArray jsonArray = jsonObject.getJSONArray("data");
         for (Object obj : jsonArray) {
             JSONObject map = (JSONObject) obj;
-            String[] keyList = {"cover_img_url", "title", "play_count", "list_id", "source_url"};
+            ListPlayListResult.ResultBean resultBean = new ListPlayListResult.ResultBean();
             String logoFuffix = map.getString("logo").startsWith("http://pic") ? "@!c-100-100" : "";
-            Object[] valueList = {map.getString("logo") + logoFuffix, map.getString("collect_name"),
-                    0, "xmplaylist_" + map.get("list_id"), "http://www.xiami.com/collect/" + map.getString("list_id")};
-            result.add(MapGenerateUtil.createMap(keyList, valueList));
+            resultBean.setCover_img_url(map.getString("logo") + logoFuffix);
+            resultBean.setTitle(map.getString("collect_name"));
+            resultBean.setPlay_count(0);
+            resultBean.setList_id("xmplaylist_" + map.get("list_id"));
+            resultBean.setSource_url("http://www.xiami.com/collect/" + map.getString("list_id"));
+            result.getResult().add(resultBean);
         }
-
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
+        return result;
     }
 
     @Override
