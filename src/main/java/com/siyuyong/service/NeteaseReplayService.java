@@ -60,27 +60,22 @@ public class NeteaseReplayService implements ReplayService {
         return neteaseRequest(url, null);
     }
 
-    private Object convertSong(NeteaseSearchResult.ResultBean.SongsBean song) {
-        Map<String, Object> map = new HashMap<>(32);
-        map.put("id", "netrack_" + song.getId());
-        map.put("title", song.getName());
-        map.put("artist", song.getArtists().get(0).getName());
-        map.put("artist_id", "neartist_" + song.getArtists().get(0).getId());
-        map.put("album", song.getAlbum().getName());
-        map.put("album_id", "nealbum_" + song.getAlbum().getId());
-        map.put("source", "netease");
-        map.put("source_url", "http://music.163.com/#/song?id=" + song.getId());
-        map.put("disabled", !nePlayable(song));
-
-        if (song.getAlbum().getPicUrl() != null) {
-            map.put("img_url", song.getAlbum().getPicUrl());
-        } else {
-            map.put("img_url", "");
-        }
-        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
-                Dict.create().set("track_id", map.get("id"))
+    private ConvertSongBean convertSong(NeteaseSearchResult.ResultBean.SongsBean song) {
+        ConvertSongBean songBean = new ConvertSongBean();
+        songBean.setId("netrack_" + song.getId());
+        songBean.setTitle(song.getName());
+        songBean.setArtist(song.getArtists().get(0).getName());
+        songBean.setArtist_id("neartist_" + song.getArtists().get(0).getId());
+        songBean.setAlbum(song.getAlbum().getName());
+        songBean.setAlbum_id("nealbum_" + song.getAlbum().getId());
+        songBean.setSource("netease");
+        songBean.setSource_url("http://music.163.com/#/song?id=" + song.getId());
+        songBean.setDisabled(!nePlayable(song));
+        songBean.setImg_url(song.getAlbum().getPicUrl() != null ? song.getAlbum().getPicUrl() : "");
+        songBean.setUrl(HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
+                Dict.create().set("track_id", songBean.getId())
                 , Charset.forName("utf-8"), true));
-        return map;
+        return songBean;
     }
 
     private boolean weapiNePlayable(NeteaseGetPlaylistResult.PrivilegesBean privilegesBean) {
@@ -170,7 +165,7 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     @Override
-    public String searchTrack(String keyword) {
+    public SearchResult searchTrack(String keyword) {
         String urlKeyWord = MyUtils.urlEncode(keyword);
         String url = "http://music.163.com/api/search/get";
         int stype = 1, offset = 0;
@@ -181,24 +176,25 @@ public class NeteaseReplayService implements ReplayService {
 
         NeteaseSearchResult data = JSON.parseObject(response, NeteaseSearchResult.class);
         List<NeteaseSearchResult.ResultBean.SongsBean> songs = data.getResult().getSongs();
-        List<Object> result = new ArrayList<>();
+//        List<Object> result = new ArrayList<>();
+        SearchResult result = new SearchResult();
         for (NeteaseSearchResult.ResultBean.SongsBean song : songs) {
             if (song.getStatus() != -1) {
-                result.add(convertSong(song));
+                result.getResult().add(convertSong(song));
             }
         }
-        return JSON.toJSONString(Dict.create().set("result", result));
+        return result;
     }
 
     @Override
-    public String getLyricById(String songId) {
+    public LyricResult getLyricById(String songId) {
         Map<String, Object> paramMap = Dict.create().set("id", songId).set("lv", -1).set("tv", -1).set("csrf_token", "");
         paramMap = encryptedRequest(paramMap);
         String url = "http://music.163.com/weapi/song/lyric?csrf_token=";
         String response = neteaseRequest(url, paramMap);
         JSONObject data = JSON.parseObject(response);
         String lrc = data.containsKey("lrc") ? data.getJSONObject("lrc").getString("lyric") : "";
-        return JSON.toJSONString(Dict.create().set("lyric", lrc));
+        return new LyricResult(lrc);
     }
 
     @Override
@@ -237,6 +233,7 @@ public class NeteaseReplayService implements ReplayService {
                 return getAlbum(typeAndId[1]);
             case "neartist":
                 return getArtist(typeAndId[1]);
+            default:
         }
         throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
     }

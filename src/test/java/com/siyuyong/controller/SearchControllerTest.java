@@ -14,7 +14,7 @@ public class SearchControllerTest extends BaseControllerTest {
         for (int source : IntStream.range(0, 3).toArray()) {
             baseTest("/search", Dict.create()
                     .set("source", String.valueOf(source))
-                    .set("keywords", "11"));
+                    .set("keywords", "11"), true);
         }
     }
 }

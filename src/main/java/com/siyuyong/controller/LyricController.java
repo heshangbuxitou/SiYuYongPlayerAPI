@@ -1,6 +1,7 @@
 package com.siyuyong.controller;
 
 import com.siyuyong.config.ServiceConfig;
+import com.siyuyong.domain.LyricResult;
 import com.siyuyong.service.ReplayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +19,7 @@ public class LyricController {
     ServiceConfig serviceConfig;
 
     @RequestMapping(value = "/lyric", method = RequestMethod.GET)
-    public String lyric(@RequestParam(value = "track_id", required = false) String trackId,
+    public LyricResult lyric(@RequestParam(value = "track_id", required = false) String trackId,
                              @RequestParam(value = "lyric_url", required = false) String lyricUrl) {
         String[] trackArray = trackId.split("_");
         ReplayService service = serviceConfig.getReplayServiceByPrefix(trackArray[0]);

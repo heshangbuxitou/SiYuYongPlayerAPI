@@ -1,5 +1,6 @@
 package com.siyuyong.service;
 
+import cn.hutool.core.lang.Dict;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -112,33 +113,49 @@ public class XiamiReplayService implements ReplayService {
         return url.substring(0, url.length() - 6) + url.substring(url.length() - 4);
     }
 
-    public Object convertSong(XiamiSearchResult.DataBean.SongsBean song) {
-        Map<String, Object> map = new HashMap<>(32);
-        map.put("id", "xmtrack_" + song.getSong_id());
-        map.put("title", song.getSong_name());
-        map.put("artist", song.getArtist_name());
-        map.put("artist_id", "xmartist_" + song.getArtist_id());
-        map.put("album", song.getAlbum_name());
-        map.put("album_id", "xmalbum_" + song.getAlbum_id());
-        map.put("source", "xiami");
-        map.put("source_url", "http://www.xiami.com/song/" + song.getSong_id());
+    public ConvertSongBean convertSong(XiamiSearchResult.DataBean.SongsBean song) {
+//        Map<String, Object> map = new HashMap<>(32);
+//        map.put("id", "xmtrack_" + song.getSong_id());
+//        map.put("title", song.getSong_name());
+//        map.put("artist", song.getArtist_name());
+//        map.put("artist_id", "xmartist_" + song.getArtist_id());
+//        map.put("album", song.getAlbum_name());
+//        map.put("album_id", "xmalbum_" + song.getAlbum_id());
+//        map.put("source", "xiami");
+//        map.put("source_url", "http://www.xiami.com/song/" + song.getSong_id());
+//
+//        if (song.getLogo() != null) {
+//            map.put("img_url", song.getLogo());
+//        } else if (song.getAlbum_logo() != null) {
+//            map.put("img_url", song.getAlbum_logo());
+//        } else {
+//            map.put("img_url", "");
+//        }
+//        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
+//                MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
+//                , Charset.forName("utf-8"), true));
+//        return map;
 
-        if (song.getLogo() != null) {
-            map.put("img_url", song.getLogo());
-        } else if (song.getAlbum_logo() != null) {
-            map.put("img_url", song.getAlbum_logo());
-        } else {
-            map.put("img_url", "");
-        }
-        map.put("url", HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
-                MapGenerateUtil.createMap(new String[]{"track_id"}, new Object[]{map.get("id")})
+        ConvertSongBean songBean = new ConvertSongBean();
+        songBean.setId("xmtrack_" + song.getSong_id());
+        songBean.setTitle(song.getSong_name());
+        songBean.setArtist(song.getArtist_name());
+        songBean.setArtist_id("xmartist_" + song.getArtist_id());
+        songBean.setAlbum(song.getAlbum_name());
+        songBean.setAlbum_id("xmalbum_" + song.getAlbum_id());
+        songBean.setSource("xiami");
+        songBean.setSource_url("http://www.xiami.com/song/" + song.getSong_id());
+        songBean.setUrl(HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
+                Dict.create().set("track_id", songBean.getId())
                 , Charset.forName("utf-8"), true));
-        return map;
+        songBean.setImg_url(song.getLogo() != null ? song.getLogo() :
+                song.getAlbum_logo() != null ? song.getAlbum_logo() : "");
+        return songBean;
     }
 
 
     @Override
-    public String searchTrack(String keyword) {
+    public SearchResult searchTrack(String keyword) {
         String urlKeyWord = MyUtils.urlEncode(keyword);
         String searchUrl = "http://api.xiami.com/web?v=2.0&app_key=1&key=" + keyword
                 + "&page=1&limit=50&_ksTS=1459930568781_153&callback=jsonp154" +
@@ -147,16 +164,18 @@ public class XiamiReplayService implements ReplayService {
         response = response.substring("jsonp154(".length(), response.length() - 1);
         XiamiSearchResult data = JSON.parseObject(response, XiamiSearchResult.class);
         List<XiamiSearchResult.DataBean.SongsBean> songs = data.getData().getSongs();
-        List<Object> result = new ArrayList<>();
+//        List<Object> result = new ArrayList<>();
+        SearchResult result = new SearchResult();
         for (XiamiSearchResult.DataBean.SongsBean song : songs) {
-            result.add(convertSong(song));
+            result.getResult().add(convertSong(song));
         }
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
+        return result;
+//        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
     }
 
     @Override
-    public String getLyricById(String lyricUrl) {
-        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"lyric"}, new Object[]{xiaMiRequest(lyricUrl)}));
+    public LyricResult getLyricById(String lyricUrl) {
+        return new LyricResult(xiaMiRequest(lyricUrl));
     }
 
     @Override

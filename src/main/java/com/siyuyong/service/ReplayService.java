@@ -1,6 +1,8 @@
 package com.siyuyong.service;
 
 import com.siyuyong.domain.BootstrapResult;
+import com.siyuyong.domain.LyricResult;
+import com.siyuyong.domain.SearchResult;
 
 import java.util.Map;
 
@@ -9,13 +11,13 @@ public interface ReplayService {
      * @param keyword 搜索的关键子
      * @return 搜索结果，考虑改成Bean形式返回
      */
-    String searchTrack(String keyword);
+    SearchResult searchTrack(String keyword);
 
     /**
      * @param songId 歌曲的id
      * @return 歌词相关结果
      */
-    String getLyricById(String songId);
+    LyricResult getLyricById(String songId);
 
     /**
      * @param offset 偏移量
