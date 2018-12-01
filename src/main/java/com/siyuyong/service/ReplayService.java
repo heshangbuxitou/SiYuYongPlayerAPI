@@ -1,9 +1,6 @@
 package com.siyuyong.service;
 
-import com.siyuyong.domain.BootstrapResult;
-import com.siyuyong.domain.ListPlayListResult;
-import com.siyuyong.domain.LyricResult;
-import com.siyuyong.domain.SearchResult;
+import com.siyuyong.domain.*;
 
 import java.util.Map;
 
@@ -30,7 +27,7 @@ public interface ReplayService {
      * @param listId 歌曲的listid
      * @return 返回 歌手，专辑， 歌单
      */
-    Map<String, Object> getPlaylist(String listId);
+    PlayListResult getPlaylist(String listId);
 
     /**
      * @param songId 歌曲id

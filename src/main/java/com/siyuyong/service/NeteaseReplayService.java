@@ -82,23 +82,22 @@ public class NeteaseReplayService implements ReplayService {
         return privilegesBean.getSubp() == 1;
     }
 
-    private Object weapiConvertSong(NeteaseGetPlaylistResult.PlaylistBean.TracksBean song, NeteaseGetPlaylistResult.PrivilegesBean privilegesBean) {
-        Map<String, Object> map = new HashMap<>(32);
-        map.put("id", "netrack_" + song.getId());
-        map.put("title", song.getName());
-        map.put("artist", song.getAr().get(0).getName());
-        map.put("artist_id", "neartist_" + song.getAr().get(0).getId());
-        map.put("album", song.getAl().getName());
-        map.put("album_id", "nealbum_" + song.getAl().getId());
-        map.put("source", "netease");
-        map.put("source_url", "http://music.163.com/#/song?id=" + song.getId());
-        map.put("img_url", song.getAl().getPicUrl());
-        map.put("disabled", !weapiNePlayable(privilegesBean));
-
-        map.put("url", HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
-                Dict.create().set("track_id", map.get("id"))
+    private ConvertSongBean weapiConvertSong(NeteaseGetPlaylistResult.PlaylistBean.TracksBean song, NeteaseGetPlaylistResult.PrivilegesBean privilegesBean) {
+        ConvertSongBean songBean = new ConvertSongBean();
+        songBean.setId("netrack_" + song.getId());
+        songBean.setTitle(song.getName());
+        songBean.setArtist(song.getAr().get(0).getName());
+        songBean.setArtist_id("neartist_" + song.getAr().get(0).getId());
+        songBean.setAlbum(song.getAl().getName());
+        songBean.setAlbum_id("nealbum_" + song.getAl().getId());
+        songBean.setSource("netease");
+        songBean.setSource_url("http://music.163.com/#/song?id=" + song.getId());
+        songBean.setDisabled(!weapiNePlayable(privilegesBean));
+        songBean.setImg_url(song.getAl().getPicUrl());
+        songBean.setUrl(HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
+                Dict.create().set("track_id", songBean.getId())
                 , Charset.forName("utf-8"), true));
-        return map;
+        return songBean;
     }
 
     private String createSecretKey(int size) {
@@ -226,7 +225,7 @@ public class NeteaseReplayService implements ReplayService {
     }
 
     @Override
-    public Map<String, Object> getPlaylist(String listId) {
+    public PlayListResult getPlaylist(String listId) {
         String[] typeAndId = listId.split("_");
         switch (typeAndId[0]) {
             case "neplaylist":
@@ -240,27 +239,29 @@ public class NeteaseReplayService implements ReplayService {
         throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
     }
 
-    private Map<String, Object> getArtist(String artistId) {
+    private PlayListResult getArtist(String artistId) {
         String url = "http://music.163.com/api/artist/" + artistId;
         String resonpse = neteaseRequest(url);
         NeteaseGetArtistResult data = JSON.parseObject(resonpse, NeteaseGetArtistResult.class);
-
-        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getArtist().getPicUrl())
-                .set("title", data.getArtist().getName())
-                .set("id", "neartist_" + artistId)
-                .set("source_url", "http://music.163.com/#/artist?id=" + artistId);
-
         List<NeteaseSearchResult.ResultBean.SongsBean> list = data.getHotSongs();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(data.getArtist().getPicUrl());
+        infoBean.setTitle(data.getArtist().getName());
+        infoBean.setId("neartist_" + artistId);
+        infoBean.setSource_url("http://music.163.com/#/artist?id=" + artistId);
+        result.setInfo(infoBean);
+
         for (NeteaseSearchResult.ResultBean.SongsBean song : list) {
             if (song.getStatus() != -1) {
-                result.add(convertSong(song));
+                result.getTracks().add(convertSong(song));
             }
         }
-        return Dict.create().set("tracks", result).set("info", infoMap);
+        return result;
     }
 
-    private Map<String, Object> neGetPlaylist(String playlistId) {
+    private PlayListResult neGetPlaylist(String playlistId) {
         String url = "http://music.163.com/weapi/v3/playlist/detail";
         Map<String, Object> paramMap = Dict.create().set("id", playlistId).set("offset", 0).set("total", true)
                 .set("limit", 1000).set("n", 1000).set("csrf_token", "");
@@ -274,33 +275,43 @@ public class NeteaseReplayService implements ReplayService {
                 .set("source_url", "http://music.163.com/#/playlist?id=" + playlistId);
 
         List<NeteaseGetPlaylistResult.PlaylistBean.TracksBean> list = data.getPlaylist().getTracks();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(data.getPlaylist().getCoverImgUrl());
+        infoBean.setTitle(data.getPlaylist().getName());
+        infoBean.setId("neplaylist_" + playlistId);
+        infoBean.setSource_url("http://music.163.com/#/playlist?id=" + playlistId);
+        result.setInfo(infoBean);
+
         int index = 0;
         for (NeteaseGetPlaylistResult.PlaylistBean.TracksBean song : list) {
-            result.add(weapiConvertSong(song, data.getPrivileges().get(index)));
+            result.getTracks().add(weapiConvertSong(song, data.getPrivileges().get(index)));
             index++;
         }
-        return Dict.create().set("tracks", result).set("info", infoMap);
+        return result;
     }
 
-    private Map<String, Object> getAlbum(String albumId) {
+    private PlayListResult getAlbum(String albumId) {
         String url = String.format("http://music.163.com/api/album/%s/", albumId);
         String resonpse = neteaseRequest(url);
         NeteaseGetAlbumResult data = JSON.parseObject(resonpse, NeteaseGetAlbumResult.class);
-
-        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getAlbum().getPicUrl())
-                .set("title", data.getAlbum().getName())
-                .set("id", "nealbum_" + albumId)
-                .set("source_url", "http://music.163.com/#/album?id=" + albumId);
-
         List<NeteaseSearchResult.ResultBean.SongsBean> list = data.getAlbum().getSongs();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(data.getAlbum().getPicUrl());
+        infoBean.setTitle(data.getAlbum().getName());
+        infoBean.setId("nealbum_" + albumId);
+        infoBean.setSource_url("http://music.163.com/#/album?id=" + albumId);
+        result.setInfo(infoBean);
+
         for (NeteaseSearchResult.ResultBean.SongsBean song : list) {
             if (song.getStatus() != -1) {
-                result.add(convertSong(song));
+                result.getTracks().add(convertSong(song));
             }
         }
-        return Dict.create().set("tracks", result).set("info", infoMap);
+        return result;
     }
 
     @Override

@@ -28,9 +28,9 @@ public class PlaylistControllerTest extends BaseControllerTest {
                     .set("list_id", listId));
         }
         // todo xmplaylist_472012905问题待修复
-        for (String listId : Stream.of("xmartist_58831", "xmalbum_298003").toArray(String[]::new)) {
-            baseTest("/playlist", Dict.create()
-                    .set("list_id", listId));
-        }
+//        for (String listId : Stream.of("xmartist_58831", "xmalbum_298003").toArray(String[]::new)) {
+//            baseTest("/playlist", Dict.create()
+//                    .set("list_id", listId));
+//        }
     }
 }

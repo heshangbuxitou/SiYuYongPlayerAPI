@@ -183,7 +183,7 @@ public class XiamiReplayService implements ReplayService {
     }
 
     @Override
-    public Map<String, Object> getPlaylist(String listId) {
+    public PlayListResult getPlaylist(String listId) {
         String[] typeAndId = listId.split("_");
         switch (typeAndId[0]) {
             case "xmplaylist":
@@ -197,7 +197,7 @@ public class XiamiReplayService implements ReplayService {
         }
     }
 
-    private Map<String, Object> getArtist(String artistId) {
+    private PlayListResult getArtist(String artistId) {
         String url = "http://api.xiami.com/web?v=2.0&app_key=1&id=" + artistId +
                 "&page=1&limit=20&_ksTS=1459931285956_216&callback=jsonp217&r=artist/detail";
         String resonpse = xiaMiRequest(url);
@@ -205,63 +205,71 @@ public class XiamiReplayService implements ReplayService {
         JSONObject data = JSON.parseObject(resonpse);
         String artistName = data.getJSONObject("data").getString("artist_name");
 
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {retinaUrl(data.getJSONObject("data").getString("logo")), artistName,
-                "xmartist_" + artistId, "http://www.xiami.com/artist/" + artistId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
-
         url = "http://api.xiami.com/web?v=2.0&app_key=1&id=" + artistId +
                 "&page=1&limit=20&_ksTS=1459931285956_216&callback=jsonp217&r=artist/hot-songs";
         resonpse = xiaMiRequest(url);
         resonpse = resonpse.substring("jsonp217(".length(), resonpse.length() - 1);
-
         XiamiGetArtistResult artistData = JSON.parseObject(resonpse, XiamiGetArtistResult.class);
         List<XiamiSearchResult.DataBean.SongsBean> list = artistData.getData();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(retinaUrl(data.getJSONObject("data").getString("logo")));
+        infoBean.setTitle(artistName);
+        infoBean.setId("xmartist_" + artistId);
+        infoBean.setSource_url("http://www.xiami.com/artist/" + artistId);
+        result.setInfo(infoBean);
+
         for (XiamiSearchResult.DataBean.SongsBean song : list) {
             song.setArtist_name(artistName);
-            result.add(convertSong(song));
+            result.getTracks().add(convertSong(song));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
-    private Map<String, Object> getAlbum(String albumId) {
+    private PlayListResult getAlbum(String albumId) {
         String url = "http://api.xiami.com/web?v=2.0&app_key=1&id=" + albumId +
                 "&page=1&limit=20&callback=jsonp217&r=album/detail";
         String resonpse = xiaMiRequest(url);
         resonpse = resonpse.substring("jsonp217(".length(), resonpse.length() - 1);
         XiamiGetAlbumResult data = JSON.parseObject(resonpse, XiamiGetAlbumResult.class);
-
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {retinaUrl(data.getData().getAlbum_logo()), data.getData().getAlbum_name(),
-                "xmalbum_" + albumId, "http://www.xiami.com/album/" + albumId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
         List<XiamiSearchResult.DataBean.SongsBean> list = data.getData().getSongs();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(retinaUrl(data.getData().getAlbum_logo()));
+        infoBean.setTitle(data.getData().getAlbum_name());
+        infoBean.setId("xmalbum_" + albumId);
+        infoBean.setSource_url("http://www.xiami.com/album/" + albumId);
+        result.setInfo(infoBean);
+
         for (XiamiSearchResult.DataBean.SongsBean song : list) {
             song.setArtist_name(data.getData().getArtist_name());
-            result.add(convertSong(song));
+            result.getTracks().add(convertSong(song));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
-    private Map<String, Object> xmGetPlaylist(String playlistId) {
+    private PlayListResult xmGetPlaylist(String playlistId) {
         String url = "http://api.xiami.com/web?v=2.0&app_key=1&id=" + playlistId +
                 "&callback=jsonp122&r=collect/detail";
         String resonpse = xiaMiRequest(url);
         resonpse = resonpse.substring("jsonp122(".length(), resonpse.length() - 1);
         XiamiGetPlaylistResult data = JSON.parseObject(resonpse, XiamiGetPlaylistResult.class);
-
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {data.getData().getLogo(), data.getData().getCollect_name(),
-                "xmplaylist_" + playlistId, "http://www.xiami.com/collect/" + playlistId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
         List<XiamiSearchResult.DataBean.SongsBean> list = data.getData().getSongs();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(data.getData().getLogo());
+        infoBean.setTitle(data.getData().getCollect_name());
+        infoBean.setId("xmplaylist_" + playlistId);
+        infoBean.setSource_url("http://www.xiami.com/collect/" + playlistId);
+        result.setInfo(infoBean);
+
         for (XiamiSearchResult.DataBean.SongsBean song : list) {
-            result.add(convertSong(song));
+            result.getTracks().add(convertSong(song));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
 

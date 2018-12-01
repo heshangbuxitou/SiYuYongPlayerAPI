@@ -165,7 +165,7 @@ public class QQReplayService implements ReplayService {
 
 
     @Override
-    public Map<String, Object> getPlaylist(String listId) {
+    public PlayListResult getPlaylist(String listId) {
         String[] typeAndId = listId.split("_");
         switch (typeAndId[0]) {
             case "qqplaylist":
@@ -179,7 +179,7 @@ public class QQReplayService implements ReplayService {
         throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
     }
 
-    private Map<String, Object> qqGetPlaylist(String playlistId) {
+    private PlayListResult qqGetPlaylist(String playlistId) {
         String url = "http://i.y.qq.com/qzone-music/fcg-bin/fcg_ucc_getcdinfo_" +
                 "byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&jsonpCallback=" +
                 "jsonCallback&nosign=1&disstid=%s&g_tk=5381&loginUin=0&hostUin=0" +
@@ -187,22 +187,25 @@ public class QQReplayService implements ReplayService {
                 "&platform=yqq&jsonpCallback=jsonCallback&needNewCode=0";
         String response = qqRequest(String.format(url, playlistId));
         response = response.substring("jsonCallback(".length(), response.length() - 1);
-
         QQGetPlaylistResult data = JSON.parseObject(response, QQGetPlaylistResult.class);
 
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {data.getCdlist().get(0).getLogo(), data.getCdlist().get(0).getDissname(),
-                "qqplaylist_" + playlistId, "https://y.qq.com/n/yqq/playlist/" + playlistId + ".html"};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
         List<QQSearchResult.DataBean.SongBean.ListBean> list = data.getCdlist().get(0).getSonglist();
-        List<Object> result = new ArrayList<>();
+        PlayListResult result = new PlayListResult();
+
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(data.getCdlist().get(0).getLogo());
+        infoBean.setTitle(data.getCdlist().get(0).getDissname());
+        infoBean.setId("qqplaylist_" + playlistId);
+        infoBean.setSource_url("https://y.qq.com/n/yqq/playlist/" + playlistId + ".html");
+        result.setInfo(infoBean);
+
         for (QQSearchResult.DataBean.SongBean.ListBean song : list) {
-            result.add(convertSong(song));
+            result.getTracks().add(convertSong(song));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
-    private Map<String, Object> getAlbum(String albumId) {
+    private PlayListResult getAlbum(String albumId) {
 
         String url = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg" +
                 "?platform=h5page&albummid=%s&g_tk=938407465" +
@@ -212,20 +215,23 @@ public class QQReplayService implements ReplayService {
         String response = qqRequest(String.format(url, albumId));
         response = response.substring(" asonglist1459961045566(".length(), response.length() - 1);
         QQGetAlbumResult data = JSON.parseObject(response, QQGetAlbumResult.class);
-
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {getImageUrl(albumId, "album"), data.getData().getName(),
-                "qqalbum_" + albumId, "http://y.qq.com/#type=album&mid=" + albumId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
         List<QQSearchResult.DataBean.SongBean.ListBean> list = data.getData().getList();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(getImageUrl(albumId, "album"));
+        infoBean.setTitle(data.getData().getName());
+        infoBean.setId("qqalbum_" + albumId);
+        infoBean.setSource_url("http://y.qq.com/#type=album&mid=" + albumId);
+        result.setInfo(infoBean);
+
         for (QQSearchResult.DataBean.SongBean.ListBean song : list) {
-            result.add(convertSong(song));
+            result.getTracks().add(convertSong(song));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
-    private Map<String, Object> getArtist(String artistId) {
+    private PlayListResult getArtist(String artistId) {
         String url = "http://i.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg" +
                 "?platform=h5page&order=listen&begin=0&num=50&singermid=" +
                 "%s&g_tk=938407465&uin=0&format=jsonp&" +
@@ -235,17 +241,20 @@ public class QQReplayService implements ReplayService {
         String response = qqRequest(String.format(url, artistId));
         response = response.substring(" ssonglist1459960621772(".length(), response.length() - 1);
         QQGetArtistResult data = JSON.parseObject(response, QQGetArtistResult.class);
-
-        String[] keyList = {"cover_img_url", "title", "id", "source_url"};
-        Object[] valueList = {getImageUrl(artistId, "artist"), data.getData().getSinger_name(),
-                "qqartist_" + artistId, "http://y.qq.com/#type=singer&mid=" + artistId};
-        Map<String, Object> infoMap = MapGenerateUtil.createMap(keyList, valueList);
         List<QQGetArtistResult.DataBean.ListBean> list = data.getData().getList();
-        List<Object> result = new ArrayList<>();
+
+        PlayListResult result = new PlayListResult();
+        PlayListResult.InfoBean infoBean = new PlayListResult.InfoBean();
+        infoBean.setCover_img_url(getImageUrl(artistId, "artist"));
+        infoBean.setTitle(data.getData().getSinger_name());
+        infoBean.setId("qqartist_" + artistId);
+        infoBean.setSource_url("http://y.qq.com/#type=singer&mid=" + artistId);
+        result.setInfo(infoBean);
+
         for (QQGetArtistResult.DataBean.ListBean song : list) {
-            result.add(convertSong(song.getMusicData()));
+            result.getTracks().add(convertSong(song.getMusicData()));
         }
-        return MapGenerateUtil.createMap(new String[]{"tracks", "info"}, new Object[]{result, infoMap});
+        return result;
     }
 
     @Override
