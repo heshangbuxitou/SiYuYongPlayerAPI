@@ -197,7 +197,6 @@ public class NeteaseReplayService implements ReplayService {
 
     @Override
     public ListPlayListResult listPlaylist(String offset) {
-//        List<Object> result = new ArrayList<>();
         ListPlayListResult result = new ListPlayListResult();
 
         for (Object obj : topPlaylists(Integer.parseInt(offset))) {
@@ -235,8 +234,8 @@ public class NeteaseReplayService implements ReplayService {
             case "neartist":
                 return getArtist(typeAndId[1]);
             default:
+                throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
         }
-        throw new RuntimeException("不存在的Playlist类型" + typeAndId[0]);
     }
 
     private PlayListResult getArtist(String artistId) {
@@ -268,12 +267,6 @@ public class NeteaseReplayService implements ReplayService {
         paramMap = encryptedRequest(paramMap);
         String resonpse = neteaseRequest(url, paramMap);
         NeteaseGetPlaylistResult data = JSON.parseObject(resonpse, NeteaseGetPlaylistResult.class);
-
-        Map<String, Object> infoMap = Dict.create().set("cover_img_url", data.getPlaylist().getCoverImgUrl())
-                .set("title", data.getPlaylist().getName())
-                .set("id", "neplaylist_" + playlistId)
-                .set("source_url", "http://music.163.com/#/playlist?id=" + playlistId);
-
         List<NeteaseGetPlaylistResult.PlaylistBean.TracksBean> list = data.getPlaylist().getTracks();
 
         PlayListResult result = new PlayListResult();

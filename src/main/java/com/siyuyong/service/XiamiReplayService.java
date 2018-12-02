@@ -135,20 +135,18 @@ public class XiamiReplayService implements ReplayService {
     @Override
     public SearchResult searchTrack(String keyword) {
         String urlKeyWord = MyUtils.urlEncode(keyword);
-        String searchUrl = "http://api.xiami.com/web?v=2.0&app_key=1&key=" + keyword
+        String searchUrl = "http://api.xiami.com/web?v=2.0&app_key=1&key=" + urlKeyWord
                 + "&page=1&limit=50&_ksTS=1459930568781_153&callback=jsonp154" +
                 "&r=search/songs";
         String response = xiaMiRequest(searchUrl);
         response = response.substring("jsonp154(".length(), response.length() - 1);
         XiamiSearchResult data = JSON.parseObject(response, XiamiSearchResult.class);
         List<XiamiSearchResult.DataBean.SongsBean> songs = data.getData().getSongs();
-//        List<Object> result = new ArrayList<>();
         SearchResult result = new SearchResult();
         for (XiamiSearchResult.DataBean.SongsBean song : songs) {
             result.getResult().add(convertSong(song));
         }
         return result;
-//        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
     }
 
     @Override

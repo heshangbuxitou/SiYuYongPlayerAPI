@@ -113,14 +113,11 @@ public class QQReplayService implements ReplayService {
 
         QQSearchResult qqSearchResult = JSON.parseObject(response, QQSearchResult.class);
         List<QQSearchResult.DataBean.SongBean.ListBean> list = qqSearchResult.getData().getSong().getList();
-//        List<Object> result = new ArrayList<>();
         SearchResult result = new SearchResult();
         for (QQSearchResult.DataBean.SongBean.ListBean song : list) {
             result.getResult().add(convertSong(song));
-//            result.add(convertSong(song));
         }
         return result;
-//        return JSON.toJSONString(MapGenerateUtil.createMap(new String[]{"result"}, new Object[]{result}));
     }
 
     @Override
