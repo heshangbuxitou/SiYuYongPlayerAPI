@@ -3,7 +3,12 @@ package com.siyuyong.constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,9 +19,18 @@ public class Constant {
     public static String DEFAULT_SERVER_IP;
     public static List<String> USER_FILTER_URLS;
     public static String LASTFM_KEY = "key";
+    public static String UPLOAD_PATH;
 
     static {
         USER_FILTER_URLS = Arrays.asList("/upload", "/download", "/getusername", "/hello");
+
+        try {
+            File file = ResourceUtils.getFile("classpath:upload");
+            UPLOAD_PATH = file.getAbsolutePath();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     //注入

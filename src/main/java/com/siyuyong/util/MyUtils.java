@@ -3,11 +3,15 @@ package com.siyuyong.util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class MyUtils {
@@ -63,5 +67,18 @@ public class MyUtils {
             result += hex;
         }
         return result;
+    }
+
+    public static void writeString(Path path, String content){
+        writeBytes(path, content.getBytes());
+    }
+
+    public static void writeBytes(Path path, byte[] bytes){
+        try {
+            Files.write(path, bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -35,6 +35,9 @@ public class Main {
 
         Main main = new Main("11");
         System.out.println(main.mm);
+
+        System.out.println(File.pathSeparator);
+        System.out.println(File.separator);
     }
 
     public static byte[] addBytes(byte[] data1, byte[] data2) {
