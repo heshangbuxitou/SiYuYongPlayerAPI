@@ -58,7 +58,7 @@ public class AuthController {
         while (params.hasMoreElements()) {
             String element = params.nextElement();
             String value = request.getParameter(element);
-            parmsObj.put(element, JSONObject.parseObject(value));
+            parmsObj.put(element, value);
         }
         HttpSession session = request.getSession();
         Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
