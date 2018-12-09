@@ -1,6 +1,5 @@
 package com.siyuyong.controller;
 
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.siyuyong.constant.Constant;
@@ -10,18 +9,16 @@ import com.siyuyong.domain.LastFmUser;
 import com.siyuyong.domain.SessionParam;
 import com.siyuyong.util.MyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,6 +64,27 @@ public class AuthController {
         Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
         MyUtils.writeString(path, parmsObj.toJSONString());
         return GeneralResult.createInstance("success");
+    }
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
+        byte[] allBytes = new byte[]{};
+        if(path.toFile().exists()){
+            allBytes = Files.readAllBytes(path);
+        }
+
+        String mimeType = "application/octet-stream";
+        response.setContentType(mimeType);
+        response.setContentLength(allBytes.length);
+
+        String headerKey = "Content-Disposition";
+        String headerValue = String.format("attachment; filename=" + MyUtils.urlEncode("listen_backup.json"));
+        response.setHeader(headerKey, headerValue);
+
+        ServletOutputStream outputStream = response.getOutputStream();
+        outputStream.write(allBytes);
     }
 }
 

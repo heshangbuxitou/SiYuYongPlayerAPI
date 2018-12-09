@@ -1,19 +1,7 @@
 package com.siyuyong;
 
-import cn.hutool.core.lang.Dict;
-import com.alibaba.fastjson.JSON;
-import com.siyuyong.util.MyUtils;
 import org.apache.commons.lang3.StringUtils;
-import sun.misc.BASE64Encoder;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
-import java.lang.management.LockInfo;
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,10 +22,8 @@ public class Main {
 
 
         Main main = new Main("11");
-        System.out.println(main.mm);
-
-        System.out.println(File.pathSeparator);
-        System.out.println(File.separator);
+        System.out.println("我是".length());
+        System.out.println("我是".getBytes().length);
     }
 
     public static byte[] addBytes(byte[] data1, byte[] data2) {
