@@ -38,7 +38,7 @@ public class AuthController {
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public JSONObject login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
+    public GeneralResult login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
         SessionParam sessionParam = JSON.parseObject(sessionStr, SessionParam.class);
         HttpSession session = request.getSession();
         if (session.getAttribute(Constant.LASTFM_KEY) == null || !session.getAttribute(Constant.LASTFM_KEY).equals(sessionParam.getKey())) {
@@ -46,9 +46,7 @@ public class AuthController {
             session.setAttribute("username", userInfo.getUser().getName());
             session.setAttribute("key", sessionParam.getKey());
         }
-        Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
-        byte[] allBytes = MyUtils.readPathBytes(path);
-        return JSONObject.parseObject(new String(allBytes));
+        return GeneralResult.createInstance("success");
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
