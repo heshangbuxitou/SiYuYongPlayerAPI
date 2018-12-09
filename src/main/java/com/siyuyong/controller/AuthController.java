@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
@@ -39,7 +38,7 @@ public class AuthController {
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public GeneralResult login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
+    public String login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
         SessionParam sessionParam = JSON.parseObject(sessionStr, SessionParam.class);
         HttpSession session = request.getSession();
         if (session.getAttribute(Constant.LASTFM_KEY) == null || !session.getAttribute(Constant.LASTFM_KEY).equals(sessionParam.getKey())) {
@@ -47,7 +46,9 @@ public class AuthController {
             session.setAttribute("username", userInfo.getUser().getName());
             session.setAttribute("key", sessionParam.getKey());
         }
-        return GeneralResult.createInstance("success");
+        Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
+        byte[] allBytes = MyUtils.readPathBytes(path);
+        return new String(allBytes);
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
@@ -67,13 +68,10 @@ public class AuthController {
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public void download(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void download(HttpServletRequest request, HttpServletResponse response){
         HttpSession session = request.getSession();
         Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
-        byte[] allBytes = new byte[]{};
-        if(path.toFile().exists()){
-            allBytes = Files.readAllBytes(path);
-        }
+        byte[] allBytes = MyUtils.readPathBytes(path);
 
         String mimeType = "application/octet-stream";
         response.setContentType(mimeType);
@@ -83,8 +81,14 @@ public class AuthController {
         String headerValue = String.format("attachment; filename=" + MyUtils.urlEncode("listen_backup.json"));
         response.setHeader(headerKey, headerValue);
 
-        ServletOutputStream outputStream = response.getOutputStream();
-        outputStream.write(allBytes);
+        ServletOutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            outputStream.write(allBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }
 
