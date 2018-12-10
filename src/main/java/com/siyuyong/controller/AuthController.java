@@ -38,7 +38,7 @@ public class AuthController {
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public GeneralResult login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
+    public String login(@RequestParam(value = "session") String sessionStr, HttpServletRequest request) {
         SessionParam sessionParam = JSON.parseObject(sessionStr, SessionParam.class);
         HttpSession session = request.getSession();
         if (session.getAttribute(Constant.LASTFM_KEY) == null || !session.getAttribute(Constant.LASTFM_KEY).equals(sessionParam.getKey())) {
@@ -46,7 +46,9 @@ public class AuthController {
             session.setAttribute("username", userInfo.getUser().getName());
             session.setAttribute("key", sessionParam.getKey());
         }
-        return GeneralResult.createInstance("success");
+
+        Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
+        return new String(MyUtils.readPathBytes(path));
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
@@ -57,7 +59,7 @@ public class AuthController {
         while (params.hasMoreElements()) {
             String element = params.nextElement();
             String value = request.getParameter(element);
-            parmsObj.put(element, value);
+            parmsObj.put(element, JSONObject.parse(value));
         }
         HttpSession session = request.getSession();
         Path path = Paths.get(Constant.UPLOAD_PATH, session.getAttribute("username") + ".json");
