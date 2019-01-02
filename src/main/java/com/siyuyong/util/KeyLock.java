@@ -25,7 +25,6 @@ public class KeyLock<K> {
     };
 
     /**
-     * 0
      * 锁定key，其他等待此key的线程将进入等待，直到调用{@link #unlock(K)}
      * 使用hashcode和equals来判断key是否相同，因此key必须实现{@link #hashCode()}和
      * {@link #equals(Object)}方法

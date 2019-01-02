@@ -15,6 +15,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Version 1.0
  */
 public enum SingleInstance {
+    /**
+     * 单例实例
+     */
     INSTANCE;
     private Lock instance;
     private KeyLock<String> keyLock;

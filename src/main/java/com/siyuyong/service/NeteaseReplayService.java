@@ -94,7 +94,7 @@ public class NeteaseReplayService implements ReplayService {
         songBean.setSource_url("http://music.163.com/#/song?id=" + song.getId());
         songBean.setDisabled(!weapiNePlayable(privilegesBean));
         songBean.setImg_url(song.getAl().getPicUrl());
-        songBean.setUrl(HttpUtil.urlWithForm("http://" + MyUtils.getLocalhostIp() + ":" + getPort() + "/bootstrap_track",
+        songBean.setUrl(HttpUtil.urlWithForm("http://" + Constant.DEFAULT_SERVER_IP + ":" + getPort() + "/bootstrap_track",
                 Dict.create().set("track_id", songBean.getId())
                 , Charset.forName("utf-8"), true));
         return songBean;
